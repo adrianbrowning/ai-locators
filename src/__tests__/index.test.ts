@@ -1,6 +1,6 @@
 import { chromium, Browser, BrowserContext, Page } from 'playwright';
 import { test as base, expect } from '@playwright/test';
-import { registerAISelector } from '../index';
+import { registerAISelector } from '../../dist/index.js';
 
 const test = base.extend<{
   page: Page;
@@ -12,6 +12,7 @@ const test = base.extend<{
       apiKey: process.env.LLM_API_KEY || '',
       model: process.env.LLM_MODEL || '',
       baseUrl: process.env.LLM_BASE_URL || '',
+      selectorFilePath: "/tmp/selectors.json"
     });
     await use();
   }, { scope: 'worker', auto: true }],
@@ -36,7 +37,11 @@ test('should find and click elements using AI locators', async ({ page }) => {
 
   // Click the get started link using AI locator
   await page.locator('ai=get started link').click();
+  await page.waitForLoadState('networkidle');
+  await page.waitForSelector('main');
+  const $main = await page.locator('main');
+  await $main.locator("ai=What's Installed link").click();
 
   // Expects page to have a heading with the name of Installation
   await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
-}); 
+});

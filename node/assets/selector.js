@@ -1,1 +1,0 @@
-../../assets/selector.js
